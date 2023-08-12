@@ -28,7 +28,7 @@ partial class ControlArea
     /// </summary>
     private void InitializeComponent()
     {
-        Subtitle = new Label();
+        Subtitle = new CustomLabel();
         SubtitleTime = new TextBox();
         SuspendLayout();
         // 

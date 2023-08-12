@@ -10,7 +10,7 @@ public partial class ControlArea : Form
     private const int WM_NCHITTEST = 0x84;
     private const int HTCLIENT = 0x1;
     private const int HTCAPTION = 0x2;
-    private string _subTitles = "";
+    private string _subTitleText = "";
     private float _currentTime = -1f;
     private Subtitle? _currentSubtitle;
 
@@ -29,8 +29,20 @@ public partial class ControlArea : Form
         FormBorderStyle = FormBorderStyle.None;
         InitializeComponent();
         SubtitleTime.TextChanged += SubtitleTime_TextChanged;
-        _subTitles = File.ReadAllText("../../../subtitles.srt");
-        _subtitleList = new Regex("\n\n").Split(_subTitles.Replace("\r", "")).Select(s =>
+        foreach (var file in new[] { "../../../subtitles.srt", "./subtitles.srt" })
+        {
+            if (Path.Exists(file)) _subTitleText = File.ReadAllText(file);
+            break;
+        }
+        ReadSubtitles();
+        SubtitleTime.BackColor = Color.DarkGray;
+        Subtitle.BackColor = Color.Transparent;
+        Subtitle.ForeColor = Color.Beige;
+    }
+
+    private void ReadSubtitles()
+    {
+        _subtitleList = new Regex("\n\n").Split(_subTitleText.Replace("\r", "")).Select(s =>
         {
             var split = s.Split("\n");
             var text = split.Where(t => !string.IsNullOrEmpty(t) && t.Any(x => char.IsLetter(x)));
@@ -43,15 +55,24 @@ public partial class ControlArea : Form
                 To = TimeOnly.ParseExact(dateString.Split("-->")[1].Trim(), "hh:mm:ss,fff", CultureInfo.InvariantCulture),
             };
         }).Where(s => !string.IsNullOrEmpty(s.Text)).ToList();
-        SubtitleTime.BackColor = Color.DarkGray;
-        Subtitle.BackColor = Color.Transparent;
-        Subtitle.ForeColor = Color.Beige;
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         switch (keyData)
         {
+            case Keys.L:
+                var fileDialog = new OpenFileDialog();
+                fileDialog.Filter = "Subtitle Files|*.srt";
+                fileDialog.InitialDirectory = Directory.GetCurrentDirectory();
+                var result = fileDialog.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    _subTitleText = File.ReadAllText(fileDialog.FileName);
+                    ReadSubtitles();
+                }
+                return true;
+
             case Keys.OemMinus:
             case Keys.Subtract:
                 _currentTime -= 0.1f;

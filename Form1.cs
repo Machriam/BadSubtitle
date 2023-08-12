@@ -38,6 +38,7 @@ public partial class ControlArea : Form
         SubtitleTime.BackColor = Color.DarkGray;
         Subtitle.BackColor = Color.Transparent;
         Subtitle.ForeColor = Color.Beige;
+        Location = new Point((int)(Screen.FromControl(this).Bounds.Width * 0.48f), (int)(Screen.FromControl(this).Bounds.Height * 0.8f));
     }
 
     private void ReadSubtitles()
